@@ -1,0 +1,97 @@
+version: '3.8'
+
+services:
+  # --- Vector Database ---
+  qdrant:
+    image: qdrant/qdrant:v1.9.0
+    container_name: dual-broker-qdrant
+    ports:
+      - "127.0.0.1:6333:6333"
+      - "127.0.0.1:6334:6334"
+    volumes:
+      - qdrant-data:/qdrant/storage
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # --- Kafka Streaming Infrastructure ---
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: dual-broker-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "127.0.0.1:2181:2181"
+    restart: unless-stopped
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: dual-broker-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "127.0.0.1:9092:9092"
+      - "127.0.0.1:29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 3
+
+  # --- Flink Streaming Pipeline ---
+  flink-jobmanager:
+    image: flink:1.19.0-scala_2.12-java17
+    container_name: dual-broker-flink-jobmanager
+    ports:
+      - "127.0.0.1:8081:8081"
+    command: jobmanager
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: flink-jobmanager
+        state.backend: rocksdb
+        state.backend.incremental: true
+        state.checkpoints.dir: file:///opt/flink/rocksdb-state/checkpoints
+        state.savepoints.dir: file:///opt/flink/rocksdb-state/savepoints
+    volumes:
+      - flink-rocksdb-state:/opt/flink/rocksdb-state
+    restart: unless-stopped
+
+  flink-taskmanager:
+    image: flink:1.19.0-scala_2.12-java17
+    container_name: dual-broker-flink-taskmanager
+    depends_on:
+      - flink-jobmanager
+    command: taskmanager
+    scale: 1
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: flink-jobmanager
+        taskmanager.numberOfTaskSlots: 4
+        state.backend: rocksdb
+        state.backend.incremental: true
+        state.checkpoints.dir: file:///opt/flink/rocksdb-state/checkpoints
+        state.savepoints.dir: file:///opt/flink/rocksdb-state/savepoints
+    volumes:
+      - flink-rocksdb-state:/opt/flink/rocksdb-state
+    restart: unless-stopped
+
+volumes:
+  qdrant-data:
+    driver: local
+  flink-rocksdb-state:
+    driver: local

@@ -1,0 +1,28 @@
+{
+  "name": "@dual-broker/web3-sandbox",
+  "version": "1.0.0",
+  "description": "Web3 transaction sandbox for dual-broker SOTA engine — EVM fork simulation, DeepTx-style analysis, Saga orchestration, and Quarter-Kelly position sizing",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "ts-node src/simulator.ts",
+    "simulate": "ts-node src/saga_manager.ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "viem": "^2.21.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "ts-node": "^10.9.2",
+    "@types/node": "^22.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT",
+  "private": true
+}

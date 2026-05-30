@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ============================================================================
+  Dual-Broker SOTA Engine — Streaming Pipeline Module
+  ============================================================================
+  Maven build descriptor for the real-time Flink streaming pipeline that
+  ingests TradFi macro data and Polymarket order-book streams from Apache
+  Kafka, fuses them via exponentially-weighted sentiment tensors, and emits
+  arbitrage alerts based on Jensen-Shannon divergence.
+
+  Packaging: uber-jar via maven-shade-plugin so the artifact can be submitted
+  directly to a Flink cluster (standalone or YARN/K8s) without additional
+  classpath configuration.
+
+  Target runtime: Java 17+, Apache Flink 1.19.x, Kafka 3.7.x
+  ============================================================================
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- ================================================================== -->
+    <!-- Project coordinates                                                -->
+    <!-- ================================================================== -->
+    <groupId>com.broker</groupId>
+    <artifactId>streaming-pipeline</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <name>Dual-Broker SOTA Engine :: Streaming Pipeline</name>
+    <description>
+        Real-time Flink streaming pipeline for dual-broker high-frequency
+        trading: sentiment fusion, Jensen-Shannon divergence arbitrage
+        detection, and RocksDB-backed stateful processing.
+    </description>
+
+    <!-- ================================================================== -->
+    <!-- Global properties                                                  -->
+    <!-- ================================================================== -->
+    <properties>
+        <!-- Java language level -->
+        <java.version>17</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- Dependency versions — pinned for reproducibility -->
+        <flink.version>1.19.1</flink.version>
+        <kafka.version>3.7.1</kafka.version>
+        <jackson.version>2.17.1</jackson.version>
+        <slf4j.version>2.0.13</slf4j.version>
+        <logback.version>1.5.6</logback.version>
+
+        <!-- Plugin versions -->
+        <shade.plugin.version>3.5.3</shade.plugin.version>
+        <compiler.plugin.version>3.13.0</compiler.plugin.version>
+    </properties>
+
+    <!-- ================================================================== -->
+    <!-- Dependencies                                                       -->
+    <!-- ================================================================== -->
+    <dependencies>
+
+        <!-- ============================================================== -->
+        <!-- Apache Flink — Core streaming runtime                          -->
+        <!-- ============================================================== -->
+
+        <!--
+          flink-streaming-java: The DataStream API — operators, windowing,
+          state, watermarks, etc.  Marked "provided" because the Flink
+          cluster already ships it; the uber-jar must NOT bundle it to avoid
+          classloader conflicts.
+        -->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-streaming-java</artifactId>
+            <version>${flink.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!--
+          flink-clients: Job submission client, REST gateway interaction,
+          and execution utilities.  Also cluster-provided.
+        -->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-clients</artifactId>
+            <version>${flink.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!--
+          flink-connector-kafka: The new unified Kafka source/sink (KafkaSource,
+          KafkaSink) introduced in Flink 1.14+ and fully stable in 1.19.
+          NOT cluster-provided — must be bundled in the uber-jar.
+        -->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-connector-kafka</artifactId>
+            <version>3.2.0-1.19</version>
+        </dependency>
+
+        <!--
+          flink-statebackend-rocksdb: RocksDB-backed keyed state for
+          large-scale, off-heap, incremental-checkpoint-capable state.
+          Marked "provided" — typically included in Flink distributions.
+        -->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-statebackend-rocksdb</artifactId>
+            <version>${flink.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- ============================================================== -->
+        <!-- Apache Kafka — Client library for consumer configuration       -->
+        <!-- ============================================================== -->
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <version>${kafka.version}</version>
+        </dependency>
+
+        <!-- ============================================================== -->
+        <!-- Jackson — JSON (de)serialisation for MarketTick, Sentiment     -->
+        <!-- ============================================================== -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+
+        <!-- ============================================================== -->
+        <!-- Logging — SLF4J API + Logback implementation                   -->
+        <!-- ============================================================== -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>${logback.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+    </dependencies>
+
+    <!-- ================================================================== -->
+    <!-- Build configuration                                                -->
+    <!-- ================================================================== -->
+    <build>
+        <plugins>
+
+            <!-- Java compiler — enforce Java 17 with modern release flag -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${compiler.plugin.version}</version>
+                <configuration>
+                    <release>${java.version}</release>
+                    <compilerArgs>
+                        <arg>-Xlint:all</arg>
+                        <arg>-Xlint:-processing</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+
+            <!--
+              Shade plugin — produces a single "fat" JAR containing all
+              non-provided dependencies.  Relocates Jackson and Kafka
+              client packages to avoid version conflicts with libraries
+              already on the Flink classpath.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>${shade.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>shade-streaming-pipeline</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <artifactSet>
+                                <excludes>
+                                    <!-- Never bundle Flink core — it is cluster-provided -->
+                                    <exclude>org.apache.flink:flink-streaming-java</exclude>
+                                    <exclude>org.apache.flink:flink-clients</exclude>
+                                    <exclude>org.apache.flink:flink-statebackend-rocksdb</exclude>
+                                    <exclude>org.apache.flink:force-shading</exclude>
+                                    <exclude>com.google.code.findbugs:jsr305</exclude>
+                                    <exclude>org.slf4j:*</exclude>
+                                    <exclude>log4j:*</exclude>
+                                </excludes>
+                            </artifactSet>
+                            <relocations>
+                                <!-- Relocate Jackson to avoid classpath collisions -->
+                                <relocation>
+                                    <pattern>com.fasterxml.jackson</pattern>
+                                    <shadedPattern>com.broker.shaded.jackson</shadedPattern>
+                                </relocation>
+                            </relocations>
+                            <filters>
+                                <filter>
+                                    <!-- Remove signature files from signed JARs -->
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                            <transformers>
+                                <transformer
+                                    implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>com.broker.flink.SentimentStreamProcessor</mainClass>
+                                </transformer>
+                                <!-- Merge META-INF/services for SPI (Kafka, Flink connectors) -->
+                                <transformer
+                                    implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
+
+</project>

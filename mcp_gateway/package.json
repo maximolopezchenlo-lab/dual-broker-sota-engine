@@ -1,0 +1,41 @@
+{
+  "name": "@dual-broker/mcp-gateway",
+  "version": "1.0.0",
+  "description": "MCP Gateway module for the dual-broker SOTA high-frequency trading engine. Provides unified JSON-RPC 2.0 transport over WebSocket/stdio to Bright Data and Alpaca MCP servers with 3-tier failover, JA4 evasion, and circuit-breaker patterns.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node --enable-source-maps dist/index.js",
+    "dev": "ts-node --esm src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "ws": "^8.18.0",
+    "uuid": "^10.0.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/ws": "^8.5.13",
+    "@types/uuid": "^10.0.0",
+    "typescript": "^5.6.0",
+    "ts-node": "^10.9.2"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "bright-data",
+    "alpaca",
+    "hft",
+    "web-scraping",
+    "trading"
+  ],
+  "license": "MIT",
+  "private": true
+}

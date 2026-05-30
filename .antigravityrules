@@ -1,0 +1,88 @@
+; =====================================================================
+; SOTA DUAL-BROKER AGENT ENVIRONMENT CONFIGURATION
+; Ecosistema: Finanzas Tradicionales & Mercados de Predicción (Polymarket)
+; Repositorio: dual-broker-sota-engine
+; =====================================================================
+
+[CORE_ORCHESTRATION]
+system_mode = "PRODUCTION_SOTA"
+agent_architecture = "DECOUPLED_MULTI_AGENT_MESH"
+memory_persistence_layer = "QDRANT_VECTOR_DB_L2"
+dynamic_prompt_routing = "LATENCY_OPTIMIZED"
+max_concurrency_threads = 64
+failover_protocol = "CRITICAL_HALT_AND_RETRY"
+swarm_persona_count = 50
+consensus_algorithm = "BAYESIAN_BRIER_WEIGHTED"
+
+[BRIGHT_DATA_MCP_GATEWAY]
+mcp_server_enforced = true
+mcp_idle_timeout_ms = 300000
+gateway_protocol = "SECURE_JSON_RPC_2.0"
+schema_validation = "STRICT"
+; Ruteo dinámico de herramientas Bright Data según el contexto de extracción
+fallback_tool_chain = "Scraping_Browser -> Web_Unlocker -> SERP_API"
+circuit_breaker_threshold = 3
+circuit_breaker_reset_ms = 60000
+
+[ALPACA_MCP_GATEWAY]
+mcp_server_enforced = true
+mcp_protocol = "SECURE_JSON_RPC_2.0"
+order_idempotency = true
+max_order_retries = 2
+execution_timeout_ms = 5000
+
+[TRADITIONAL_FINANCE_PIPELINE]
+data_staleness_limit_seconds = 5
+sec_filing_parsing_mode = "RAW_LLM_STREAM"
+macro_data_ingestion_frequency_hz = 1.0
+allowed_broker_apis = ["ALPACA", "INTERACTIVE_BROKERS"]
+risk_assessment_required = true
+max_slippage_percent = 0.15
+
+[POLYMARKET_PREDICTION_PIPELINE]
+anti_cloudflare_bypass_level = "AGGRESSIVE"
+render_javascript_spa = true
+orderbook_polling_interval_ms = 500
+smart_contract_interaction = "DIRECT_RPC"
+sentiment_analysis_sources = ["X_TWITTER", "REDDIT", "SERP_FINANCIAL_NEWS"]
+max_bet_size_usd = 5000.00
+clob_version = "V2"
+
+[STREAMING_PIPELINE]
+kafka_bootstrap_servers = "localhost:9092"
+flink_state_backend = "ROCKSDB_OFF_HEAP"
+rocksdb_write_buffer_mb = 128
+rocksdb_block_cache_mb = 512
+rocksdb_compaction_threads = 8
+sliding_window_size_minutes = 60
+sliding_window_slide_minutes = 1
+watermark_delay_seconds = 10
+late_event_tolerance_seconds = 60
+sentiment_decay_lambda = 0.01
+
+[VECTOR_DATABASE]
+provider = "QDRANT"
+host = "localhost"
+port = 6333
+collection_name = "sentiment_embeddings"
+vector_dimension = 384
+distance_metric = "COSINE"
+fallback_mode = "IN_MEMORY"
+
+[SAFETY_AND_EXECUTION_GUARDRAILS]
+simulation_first_validation = true
+sandbox_environment_uri = "http://127.0.0.1:8545"
+double_sign_threshold_usd = 10000.00
+emergency_kill_switch_enabled = true
+max_daily_drawdown_percent = 2.5
+anomaly_detection_sensitivity = 0.98
+risk_score_block_threshold = 50
+saga_compensation_enabled = true
+
+[AGENT_BEHAVIOR_RULES]
+deterministic_output_format = "JSON_SCHEMA"
+reasoning_trace_enforced = true
+hallucination_filter_threshold = 0.99
+collateral_damage_prevention = "STRICT"
+quarter_kelly_enforced = true
+jensen_shannon_threshold = 0.05

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dual-Broker SOTA Engine - Quantitative Dashboard</title>
+  <!-- Import Premium Typography from Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Embedded subtle grid background glow -->
+  <div class="glow-bg"></div>
+
+  <header class="app-header">
+    <div class="header-logo">
+      <h1>DUAL-BROKER SOTA ENGINE</h1>
+      <span class="badge">SOTA v2.0</span>
+      <span class="badge" id="mode-badge" style="background: rgba(0, 242, 254, 0.1); border: 1px solid rgba(0, 242, 254, 0.3); color: #00f2fe; margin-left: 6px; cursor: pointer; transition: all 0.2s;" title="Click to refresh/sync with live backend">Live Monitor</span>
+      <span class="badge" id="session-time-badge" style="background: rgba(255, 171, 0, 0.1); border: 1px solid rgba(255, 171, 0, 0.3); color: #ffab00; font-family: monospace; display: none;">Session: --:--:-- remaining</span>
+    </div>
+    
+    <!-- Connection Ribbon (Bright Data, Alpaca, EVM RPC Nodes) -->
+    <div class="connection-ribbon">
+      <div class="connection-node" id="node-brightdata">
+        <span class="pulse-indicator success"></span>
+        <span class="node-label">Bright Data MCP</span>
+      </div>
+      <div class="connection-node" id="node-alpaca">
+        <span class="pulse-indicator success"></span>
+        <span class="node-label">Alpaca Broker</span>
+      </div>
+      <div class="connection-node" id="node-evm">
+        <span class="pulse-indicator success"></span>
+        <span class="node-label">Polygon RPC</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Core Metric Dashboard Grid -->
+  <section class="metrics-grid">
+    <article class="metric-card" id="metric-swarm">
+      <h3>Swarm Consensus</h3>
+      <div class="value" id="val-swarm">0.00%</div>
+      <p class="desc">Weighted Bayesian probability (P_swarm)</p>
+    </article>
+    
+    <article class="metric-card" id="metric-posterior">
+      <h3>Bayesian Posterior</h3>
+      <div class="value" id="val-posterior">0.00%</div>
+      <p class="desc">Log-odds fused probability (P_posterior)</p>
+    </article>
+    
+    <article class="metric-card" id="metric-edge">
+      <h3>Arbitrage Edge</h3>
+      <div class="value" id="val-edge">0.00%</div>
+      <p class="desc">CEX/DEX spread margin</p>
+    </article>
+    
+    <article class="metric-card" id="metric-kelly">
+      <h3>Kelly Allocation</h3>
+      <div class="value" id="val-kelly">$0.00</div>
+      <p class="desc">Quarter-Kelly size limit (USDC)</p>
+    </article>
+    
+    <article class="metric-card" id="metric-jsd">
+      <h3>JS Divergence</h3>
+      <div class="value" id="val-jsd">0.0000</div>
+      <p class="desc">Temporal entropy drift (D_JS)</p>
+    </article>
+
+    <article class="metric-card" id="metric-pnl" style="border: 1px solid rgba(0, 230, 118, 0.3); background: rgba(0, 230, 118, 0.03);">
+      <h3>Net P&L</h3>
+      <div class="value success" id="val-pnl">$0.00</div>
+      <p class="desc">Realized net returns (with costs)</p>
+    </article>
+
+    <article class="metric-card" id="metric-costs" style="border: 1px solid rgba(255, 61, 0, 0.3); background: rgba(255, 61, 0, 0.03); display: flex; flex-direction: column;">
+      <h3>Operating Costs</h3>
+      <div class="value warning" id="val-costs">$0.00</div>
+      <!-- Detailed cost breakdown grid -->
+      <div class="cost-breakdown-details" style="display: flex; flex-direction: column; gap: 4px; margin: 8px 0; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 8px; font-size: 0.75rem; color: var(--color-muted); line-height: 1.4;">
+        <div style="display: flex; justify-content: space-between; gap: 12px;">
+          <span>AI/ML API (LLM):</span>
+          <span id="val-cost-llm" style="color: var(--color-text-normal); font-weight: 500;">$0.00</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; gap: 12px;">
+          <span>Bright Data (Proxy):</span>
+          <span id="val-cost-brightdata" style="color: var(--color-text-normal); font-weight: 500;">$0.00</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; gap: 12px;">
+          <span>Alpaca Broker Fees:</span>
+          <span id="val-cost-broker" style="color: var(--color-text-normal); font-weight: 500;">$0.00</span>
+        </div>
+        <div id="aiml-balance-row" style="display: none; justify-content: space-between; gap: 12px; margin-top: 4px; border-top: 1px dashed rgba(255, 255, 255, 0.07); padding-top: 4px;">
+          <span>AI/ML Key Balance:</span>
+          <span id="val-aiml-balance" style="color: #00e676; font-weight: 500;">$0.00</span>
+        </div>
+      </div>
+      <p class="desc">LLM, Scraping & Broker fees</p>
+    </article>
+
+    <article class="metric-card" id="metric-gross" style="border: 1px solid rgba(33, 150, 243, 0.3); background: rgba(33, 150, 243, 0.03);">
+      <h3>Gross Returns</h3>
+      <div class="value" id="val-gross" style="color: #2196f3;">$0.00</div>
+      <p class="desc">Trade P&L before costs</p>
+    </article>
+    
+    <article class="metric-card" id="metric-trades">
+      <h3>Arbitrage Cycles</h3>
+      <div class="value" id="val-trades">0</div>
+      <p class="desc">Total Alpaca Paper trades</p>
+    </article>
+
+    <article class="metric-card" id="metric-rollback-count">
+      <h3>Saga Rollbacks</h3>
+      <div class="value warning" id="val-rollback-count">0</div>
+      <p class="desc">Alpaca order failures</p>
+    </article>
+  </section>
+
+  <!-- Main Dashboard Columns -->
+  <main class="dashboard-main">
+    
+    <!-- Left Column: Controls & Transaction Log -->
+    <section class="dashboard-col left-col">
+      <!-- Control Panel -->
+      <article class="glass-panel" id="panel-controls">
+        <h2>Control Console</h2>
+        <div class="control-form">
+          <label for="scenario-select">Market Scenario Selector</label>
+          <div class="custom-select-wrapper">
+            <select id="scenario-select">
+              <option value="cpi_release">US CPI Inflation Report (GLD - Bearish Signal)</option>
+              <option value="fomc_meeting">FOMC Rate Cut Decision (SPY - Bullish Signal)</option>
+              <option value="crypto_dump">DeFi Liquidity Cascade (WETH - High Volatility)</option>
+              <option value="earnings_beat">Tech Sector Earnings Surpass (QQQ - Normal Growth)</option>
+            </select>
+          </div>
+          
+          <label for="interval-select">Auto-Execution Interval</label>
+          <div class="custom-select-wrapper" style="margin-bottom: 12px;">
+            <select id="interval-select">
+              <option value="manual">Manual Trigger Only</option>
+              <option value="10000">Every 10 Seconds (Fast Validation)</option>
+              <option value="30000">Every 30 Seconds</option>
+              <option value="60000">Every 1 Minute</option>
+              <option value="300000" selected>Every 5 Minutes (Recommended)</option>
+              <option value="600000">Every 10 Minutes</option>
+            </select>
+          </div>
+
+          <button class="btn btn-primary" id="btn-run-cycle">Execute Swarm Cycle</button>
+          <button class="btn btn-demo" id="btn-demo-sim" style="margin-top: 8px;">Run Demo Simulation</button>
+          <button class="btn btn-secondary" id="btn-open-settings" popovertarget="settings-panel" style="margin-top: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-card); color: var(--color-text-normal);">Configure Keys & Parameters</button>
+        </div>
+      </article>
+
+      <!-- Transaction/Saga Execution Panel -->
+      <article class="glass-panel" id="panel-saga">
+        <h2>Saga Execution Flow</h2>
+        <div class="saga-visualizer">
+          
+          <div class="saga-leg" id="leg-poly">
+            <div class="leg-header">
+              <span class="badge-dot" id="dot-leg-poly"></span>
+              <h4>Leg 1: Polymarket (DEX)</h4>
+            </div>
+            <div class="leg-body">
+              <p><strong>Action:</strong> <span id="leg-poly-action">-</span></p>
+              <p><strong>Size:</strong> <span id="leg-poly-size">-</span></p>
+              <p><strong>Fill:</strong> <span id="leg-poly-fill">-</span></p>
+              <p><strong>Gas:</strong> <span id="leg-poly-gas">-</span></p>
+            </div>
+          </div>
+          
+          <div class="saga-connector">
+            <div class="connector-line" id="saga-flow-line"></div>
+          </div>
+
+          <div class="saga-leg" id="leg-tradfi">
+            <div class="leg-header">
+              <span class="badge-dot" id="dot-leg-tradfi"></span>
+              <h4>Leg 2: Alpaca Broker (TradFi)</h4>
+            </div>
+            <div class="leg-body">
+              <p><strong>Action:</strong> <span id="leg-tradfi-action">-</span></p>
+              <p><strong>Symbol:</strong> <span id="leg-tradfi-symbol">-</span></p>
+              <p><strong>Qty:</strong> <span id="leg-tradfi-qty">-</span></p>
+              <p><strong>Status:</strong> <span id="leg-tradfi-status">-</span></p>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="saga-console">
+          <div class="console-header">
+            <span>Saga Transaction Timeline Logs</span>
+            <span class="console-clear" id="console-clear">Clear</span>
+          </div>
+          <div class="console-body" id="saga-log-container">
+            <div class="log-entry system">[SYSTEM] Dashboard ready. Select a scenario and execute to begin simulation.</div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- Right Column: Consensus Grid & Ingestion Signal -->
+    <section class="dashboard-col right-col">
+      <!-- 50 Persona Grid -->
+      <article class="glass-panel" id="panel-swarm-matrix">
+        <div class="panel-header">
+          <h2>Swarm Persona Consensus Matrix</h2>
+          <span class="sub-badge" id="personas-count">50 Nodes Online</span>
+        </div>
+        
+        <!-- Consensus matrix grids -->
+        <div class="personas-matrix" id="swarm-matrix-container">
+          <!-- Populated dynamically via app.js -->
+        </div>
+
+        <div class="legend">
+          <span class="legend-item"><span class="color-dot buy-yes"></span> YES (Bullish Bias)</span>
+          <span class="legend-item"><span class="color-dot neutral"></span> Neutral / Prior</span>
+          <span class="legend-item"><span class="color-dot sell-no"></span> NO (Bearish Bias)</span>
+        </div>
+      </article>
+
+      <!-- Researcher Ingested Signal Panel -->
+      <article class="glass-panel" id="panel-researcher">
+        <h2>Ingested Macroeconomic Signal</h2>
+        <div class="signal-details">
+          <div class="signal-row">
+            <span class="label">Macro Ticker:</span>
+            <span class="value bright" id="sig-ticker">-</span>
+          </div>
+          <div class="signal-row">
+            <span class="label">Sentiment Score:</span>
+            <span class="value bright" id="sig-sentiment">-</span>
+          </div>
+          <div class="signal-row">
+            <span class="label">Directional Bias:</span>
+            <span class="value" id="sig-direction">-</span>
+          </div>
+          <div class="signal-row">
+            <span class="label">Confidence Margin:</span>
+            <span class="value" id="sig-confidence">-</span>
+          </div>
+          <div class="signal-row full-width">
+            <span class="label">Verification Hash (SHA-256):</span>
+            <span class="value hash" id="sig-hash">-</span>
+          </div>
+          <div class="signal-snippet">
+            <span class="label">Raw Ingested Snippet:</span>
+            <blockquote id="sig-snippet">Select a scenario to trigger the ingestion agent...</blockquote>
+          </div>
+        </div>
+      </article>
+    </section>
+
+  </main>
+
+  <footer class="app-footer">
+    <p>Dual-Broker Quantitative Trade Orchestrator — Advanced Multi-Agent Framework</p>
+  </footer>
+
+  <!-- Settings Panel (Popover API Dialog) -->
+  <div popover id="settings-panel" class="glass-panel settings-overlay" role="dialog">
+    <div class="settings-header">
+      <h2>Engine Configuration Console</h2>
+      <button class="close-btn" popovertarget="settings-panel" popovertargetaction="hide">×</button>
+    </div>
+    <form id="settings-form" class="control-form">
+      <div class="form-row">
+        <label for="cfg-bankroll">Allocated Strategy Capital (USDC):</label>
+        <input type="number" id="cfg-bankroll" value="100000" min="1000" step="1000">
+      </div>
+      <div class="form-row">
+        <label for="cfg-session-duration">Session Duration Limit:</label>
+        <div class="custom-select-wrapper">
+          <select id="cfg-session-duration" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-card); color: var(--color-text-normal); padding: 8px; width: 100%; border-radius: var(--radius-sm); font-size: 0.85rem; outline: none;">
+            <option value="infinite">Infinite (No Limit)</option>
+            <option value="10">10 Minutes (Quick Test)</option>
+            <option value="30">30 Minutes</option>
+            <option value="120">2 Hours</option>
+            <option value="480">8 Hours</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <label for="cfg-tickers">Allowed TradFi Hedging Tickers (comma-separated):</label>
+        <input type="text" id="cfg-tickers" value="SPY, GLD, QQQ, TLT">
+      </div>
+      <div class="form-row">
+        <label for="cfg-alpaca-key">Alpaca Broker API Key:</label>
+        <input type="password" id="cfg-alpaca-key" value="AKIAIOSFODNN7EXAMPLE">
+      </div>
+      <div class="form-row">
+        <label for="cfg-alpaca-secret">Alpaca Broker Secret Key:</label>
+        <input type="password" id="cfg-alpaca-secret" placeholder="Enter Alpaca Secret Key">
+      </div>
+      <div class="form-row">
+        <label for="cfg-aiml-key">AI/ML API Key (LLM Brain):</label>
+        <input type="password" id="cfg-aiml-key" placeholder="Enter AIML_API_KEY for smart LLM decisions">
+      </div>
+      <div class="form-row">
+        <label for="cfg-web3-key">Polymarket Web3 Private Key:</label>
+        <input type="password" id="cfg-web3-key" value="0x0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef">
+      </div>
+      <div class="form-row flex-row">
+        <label for="cfg-simulation">Run Swarm in Simulation Mode:</label>
+        <div class="toggle-switch">
+          <input type="checkbox" id="cfg-simulation" checked>
+          <span class="slider"></span>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary" style="margin-top: 12px;">Save Configurations</button>
+    </form>
+  </div>
+
+  <!-- Shared Top-Layer Tooltip (Popover API) -->
+  <div popover="manual" id="shared-tooltip" role="tooltip">
+    <div class="tooltip-content"></div>
+  </div>
+
+  <!-- Polyfills for older browsers (Popover and CSS Anchor Positioning) -->
+  <script type="module">
+    (async () => {
+      if (!('popover' in HTMLElement.prototype)) {
+        const { apply } = await import('https://unpkg.com/@oddbird/popover-polyfill@latest/dist/popover-fn.js');
+        apply();
+      }
+      if (!('anchorName' in document.documentElement.style)) {
+        await import('https://unpkg.com/@oddbird/css-anchor-positioning');
+      }
+    })();
+  </script>
+
+  <script src="app.js"></script>
+</body>
+</html>
