@@ -1,0 +1,67 @@
+{
+  "live_mode": false,
+  "cycle_running": false,
+  "accumulated_pnl": 0.0,
+  "gross_pnl": 0.0,
+  "accumulated_costs": 0.0,
+  "total_trades": 0,
+  "rollback_count": 0,
+  "latest_logs": [
+    {
+      "time": "--:--:--",
+      "message": "Dashboard ready. Select a scenario and execute to begin simulation.",
+      "type": "system"
+    }
+  ],
+  "allocated_capital": 100000.0,
+  "session_end_time": null,
+  "loop_interval": "manual",
+  "cost_breakdown": {
+    "llm": 0.0,
+    "bright_data": 0.0,
+    "broker": 0.0,
+    "aiml_start_balance": null,
+    "aiml_current_balance": null,
+    "aiml_real_spent": 0.0
+  },
+  "saga_state": {
+    "leg_poly_status": "inactive",
+    "leg_poly_action": "-",
+    "leg_poly_size": "-",
+    "leg_poly_fill": "-",
+    "leg_poly_gas": "-",
+    "connector_status": "inactive",
+    "leg_tradfi_status": "inactive",
+    "leg_tradfi_action": "-",
+    "leg_tradfi_symbol": "-",
+    "leg_tradfi_qty": "-"
+  },
+  "config": {
+    "bankroll": 100000.0,
+    "session_duration": "infinite",
+    "tickers": "ETH-USD, BTC-USD, SOL-USD, LTC-USD",
+    "alpaca_key": "your_alpaca_api_key_here",
+    "alpaca_secret": "********",
+    "aiml_key": "********",
+    "web3_key": "********",
+    "simulation_mode": true
+  },
+  "latest_signal": {
+    "ticker": "-",
+    "sentiment_score": 0.0,
+    "direction": "-",
+    "confidence": 0.0,
+    "raw_snippet": "-",
+    "source_verification": "-",
+    "macro_context": "-",
+    "price": 0.0
+  },
+  "latest_consensus": {
+    "p_swarm": 0.0,
+    "p_posterior": 0.0,
+    "edge": 0.0,
+    "kelly_size": 0.0,
+    "jsd": 0.0
+  },
+  "persona_estimates": []
+}
