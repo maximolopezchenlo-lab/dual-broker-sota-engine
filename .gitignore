@@ -1,5 +1,7 @@
 # Environment configuration
 .env
+.antigravityrules
+system.rules
 
 # Python virtual environment and caching
 venv/
