@@ -18,7 +18,7 @@ The platform features a premium, interactive web interface designed for real-tim
 
 | Live Dashboard (Dark Mode) | Engine Configuration Console | Real-time Cost Breakdown |
 | :---: | :---: | :---: |
-| ![Live Dashboard](https://raw.githubusercontent.com/maximolopezchenlo-lab/dual-broker-sota-engine/main/assets/dashboard_dark.png) | ![Configuration Console](https://raw.githubusercontent.com/maximolopezchenlo-lab/dual-broker-sota-engine/main/assets/dashboard_light.png) | ![Cost Breakdown](https://raw.githubusercontent.com/maximolopezchenlo-lab/dual-broker-sota-engine/main/assets/billing_chart.png) |
+| ![Live Dashboard](https://raw.githubusercontent.com/maximolopezchenlo-lab/dual-broker-sota-engine/main/assets/dashboard_dark.png?v=3) | ![Configuration Console](https://raw.githubusercontent.com/maximolopezchenlo-lab/dual-broker-sota-engine/main/assets/dashboard_light.png?v=3) | ![Cost Breakdown](https://raw.githubusercontent.com/maximolopezchenlo-lab/dual-broker-sota-engine/main/assets/billing_chart.png?v=3) |
 
 
 ---
@@ -139,7 +139,7 @@ Here are the graphical results obtained from our exhaustive 3-day historical bac
 
 | 3-Day Backtest Equity Curve | Multi-Scenario Stress Test PnL |
 | :---: | :---: |
-| ![Backtest Equity Curve](https://raw.githubusercontent.com/maximolopezchenlo-lab/dual-broker-sota-engine/main/assets/backtest_equity.png) | ![Stress Test Scenario PnL](https://raw.githubusercontent.com/maximolopezchenlo-lab/dual-broker-sota-engine/main/assets/scenarios_pnl.png) |
+| ![Backtest Equity Curve](https://raw.githubusercontent.com/maximolopezchenlo-lab/dual-broker-sota-engine/main/assets/backtest_equity.png?v=3) | ![Stress Test Scenario PnL](https://raw.githubusercontent.com/maximolopezchenlo-lab/dual-broker-sota-engine/main/assets/scenarios_pnl.png?v=3) |
 
 ### Key Performance Insights
 *   **Consistent Profitability**: The 3-day backtest yielded a net profit of **+334.30 USDC**, demonstrating the accuracy of the swarm consensus in capturing real arbitrage opportunities.
